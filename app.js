@@ -1,14 +1,15 @@
 import "dotenv/config";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
+import express, { urlencoded } from "express";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import cors from "cors";
-import express from "express";
+import passport from "passport";
 import mongoose from "mongoose";
 import rootRouter from "./routes/root.js";
 
+import userModel from "./models/user.js";
 import messageModel from "./models/message.js";
-
-const EVENT_NEW_MSG = "NEW_MSG";
 
 await mongoose
   .connect(process.env.MDB, {
@@ -23,6 +24,29 @@ await mongoose
   });
 
 const app = express();
+
+//Passport auth setup
+const jwtOpts = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.SECRET,
+};
+
+passport.use(
+  new JwtStrategy(jwtOpts, async (jwt_payload, done) => {
+    const user = await userModel.findOne(
+      { _id: jwt_payload.id },
+      "username _id",
+    );
+
+    if (!user) {
+      return done(null, false);
+    } else {
+      return done(null, user);
+    }
+  }),
+);
+
+//Socket IO setup
 const nodeServer = createServer(app);
 const io = new Server(nodeServer, {
   cors: {
@@ -31,6 +55,11 @@ const io = new Server(nodeServer, {
 });
 
 app.use(cors());
+app.use(passport.initialize());
+app.use(express.static("./public"));
+app.use(urlencoded({ extended: false }));
+app.use(express.json());
+
 app.use("/", rootRouter);
 
 io.on("connection", (socket) => {
@@ -40,10 +69,10 @@ io.on("connection", (socket) => {
   const roomId = socket.handshake.query.roomId;
   socket.join(roomId);
 
-  socket.on(EVENT_NEW_MSG, async (message) => {
+  socket.on(process.env.SOCKET_EVENT_NEW_MSG, async (message) => {
     const msg = new messageModel({ ...message });
     await msg.save();
-    io.emit(EVENT_NEW_MSG, msg);
+    io.emit(process.env.SOCKET_EVENT_NEW_MSG, msg);
   });
 
   socket.on("disconnect", () => {

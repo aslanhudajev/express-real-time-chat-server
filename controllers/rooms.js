@@ -2,11 +2,9 @@ import room from "../models/room.js";
 import message from "../models/message.js";
 import asyncHandler from "express-async-handler";
 
-const user = { username: "admin", _id: "66aaaade75a3e1daa7f9c49c" };
-
 export const getRooms = asyncHandler(async (req, res, next) => {
   const rooms = await room
-    .find({ members: { $in: user._id } })
+    .find({ members: { $in: req.user._id } })
     .populate("members")
     .exec();
   return res.json(rooms);
