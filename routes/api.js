@@ -1,3 +1,6 @@
+import user from "../models/user.js";
+import room from "../models/room.js";
+
 import express from "express";
 import * as roomsController from "../controllers/rooms.js";
 const router = express.Router();
@@ -12,7 +15,7 @@ router.post("/signout");
 router.get("/me");
 
 router.get("/rooms", roomsController.getRooms);
-router.get("/room/:roomId");
+router.get("/room/:roomId", roomsController.getRoom);
 router.post("/room/:roomId/new-message");
 router.post("/room/remove");
 

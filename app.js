@@ -1,13 +1,13 @@
-import express from "express";
-import { createServer } from "node:http";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { Server } from "socket.io";
+import { createServer } from "node:http";
+import express from "express";
+import cors from "cors";
 import mongoose from "mongoose";
-
 import rootRouter from "./routes/root.js";
+import messageModel from "./models/message.js";
 import "dotenv/config";
-import { dir, log } from "node:console";
+
+const EVENT_NEW_MSG = "NEW_MSG";
 
 await mongoose
   .connect(process.env.MDB, {
@@ -29,17 +29,24 @@ const io = new Server(nodeServer, {
   },
 });
 
+app.use(cors());
 app.use("/", rootRouter);
 
 io.on("connection", (socket) => {
-  console.log("User connected, connections: " + io.engine.clientsCount);
+  console.log(
+    `User connected to room ${socket.handshake.query.roomId}, connections: ${io.engine.clientsCount}`,
+  );
+  const roomId = socket.handshake.query.roomId;
+  socket.join(roomId);
 
-  socket.on("chat msg", (msg) => {
-    io.emit("chat msg", msg);
+  socket.on(EVENT_NEW_MSG, (message) => {
+    const msg = new messageModel({ ...message });
+    console.log(msg);
+    io.emit(EVENT_NEW_MSG, msg);
   });
 
   socket.on("disconnect", () => {
-    console.log("User DC, connections: " + io.engine.clientsCount);
+    console.log(`User DC, connections: ${io.engine.clientsCount}`);
   });
 });
 
