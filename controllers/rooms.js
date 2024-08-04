@@ -12,7 +12,10 @@ export const getRooms = asyncHandler(async (req, res, next) => {
 
 export const getRoom = asyncHandler(async (req, res, next) => {
   const roomId = req.params.roomId;
-  const roomMessages = await message.find({ room: roomId });
+  const roomMessages = await message
+    .find({ room: roomId })
+    .populate("user")
+    .exec();
 
   return res.json(roomMessages);
 });

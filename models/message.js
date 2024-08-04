@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const Message = new Schema({
-  user: Schema.Types.ObjectId,
+  user: { type: Schema.Types.ObjectId, ref: "user" },
   content: String,
   room: Schema.Types.ObjectId,
   date: Date,
