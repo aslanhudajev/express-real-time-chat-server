@@ -1,11 +1,12 @@
+import "dotenv/config";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
-import express from "express";
 import cors from "cors";
+import express from "express";
 import mongoose from "mongoose";
 import rootRouter from "./routes/root.js";
+
 import messageModel from "./models/message.js";
-import "dotenv/config";
 
 const EVENT_NEW_MSG = "NEW_MSG";
 
@@ -39,9 +40,9 @@ io.on("connection", (socket) => {
   const roomId = socket.handshake.query.roomId;
   socket.join(roomId);
 
-  socket.on(EVENT_NEW_MSG, (message) => {
+  socket.on(EVENT_NEW_MSG, async (message) => {
     const msg = new messageModel({ ...message });
-    console.log(msg);
+    await msg.save();
     io.emit(EVENT_NEW_MSG, msg);
   });
 
