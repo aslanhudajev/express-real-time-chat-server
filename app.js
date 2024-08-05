@@ -70,8 +70,10 @@ io.on("connection", (socket) => {
   socket.join(roomId);
 
   socket.on(process.env.SOCKET_EVENT_NEW_MSG, async (message) => {
-    const msg = new messageModel({ ...message });
+    let msg = new messageModel({ ...message });
     await msg.save();
+    msg = await messageModel.findOne({ _id: msg._id }).populate("user");
+
     io.emit(process.env.SOCKET_EVENT_NEW_MSG, msg);
   });
 
