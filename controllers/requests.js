@@ -37,4 +37,12 @@ export const sendRequest = asyncHandler(async (req, res, next) => {
   });
 });
 
-export const acceptRequest = asyncHandler(async (req, res, next) => {});
+export const acceptRequest = asyncHandler(async (req, res, next) => {
+  console.log("accepted");
+  return next();
+});
+
+export const declineRequest = asyncHandler(async (req, res, next) => {
+  console.log("dec");
+  return next();
+});

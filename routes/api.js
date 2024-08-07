@@ -16,10 +16,10 @@ router.get("/rooms", roomsController.getRooms);
 router.get("/room/:roomId", roomsController.getRoom);
 router.post("/room/remove");
 
+router.post("/request/accept/:requestId", requestsController.acceptRequest);
+router.post("/request/decline/:requestId", requestsController.declineRequest);
 router.get("/requests", requestsController.getRequests);
 router.post("/request/send", requestsController.sendRequest);
-router.post("/request/accept");
-router.post("/request/decline");
 
 //! Add controller functions for these
 //! Add controller functions for these
