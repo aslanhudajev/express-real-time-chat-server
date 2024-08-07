@@ -12,6 +12,14 @@ export const getRequests = asyncHandler(async (req, res, next) => {
   return res.json(requests);
 });
 
+export const getRequestsCount = asyncHandler(async (req, res, next) => {
+  const requestsCount = await requestModel
+    .find({ receiver: req.user._id })
+    .countDocuments()
+    .exec();
+  res.json(requestsCount);
+});
+
 export const sendRequest = asyncHandler(async (req, res, next) => {
   const receiver = await user.findOne({ username: req.body.receiver });
   const sender = req.user;

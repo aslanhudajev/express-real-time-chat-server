@@ -19,6 +19,7 @@ router.post("/room/remove");
 router.post("/request/decline/:requestId", requestsController.declineRequest);
 router.post("/request/accept/:requestId", requestsController.acceptRequest);
 router.post("/request/send", requestsController.sendRequest);
+router.get("/requests/count", requestsController.getRequestsCount);
 router.get("/requests", requestsController.getRequests);
 
 //! Add controller functions for these
