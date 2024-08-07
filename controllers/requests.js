@@ -1,9 +1,10 @@
 import asyncHandler from "express-async-handler";
-import request from "../models/request.js";
+import requestModel from "../models/request.js";
+import roomModel from "../models/room.js";
 import user from "../models/user.js";
 
 export const getRequests = asyncHandler(async (req, res, next) => {
-  const requests = await request
+  const requests = await requestModel
     .find({ receiver: req.user._id })
     .populate("sender")
     .exec();
@@ -23,7 +24,7 @@ export const sendRequest = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const newRequest = new request({
+  const newRequest = new requestModel({
     sender: sender._id,
     receiver: receiver._id,
   });
@@ -33,16 +34,68 @@ export const sendRequest = asyncHandler(async (req, res, next) => {
   res.status(200);
   return res.json({
     success: true,
-    message: "Friend request sent",
+    message: "Friend requestModel sent",
   });
 });
 
 export const acceptRequest = asyncHandler(async (req, res, next) => {
-  console.log("accepted");
-  return next();
+  const request = await requestModel
+    .findOne({ _id: req.params.requestId })
+    .exec();
+
+  if (!request) {
+    res.status(400);
+    return res.json({
+      success: false,
+      message: "Bad request",
+    });
+  }
+
+  if (!req.user._id.equals(request.receiver)) {
+    res.status(401);
+    return res.json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  const newRoom = new roomModel({
+    members: [request.sender._id, request.receiver._id],
+  });
+  await newRoom.save();
+  await requestModel.findOneAndDelete({ _id: request._id });
+
+  res.status(200);
+  return res.json({
+    success: true,
+    message: "Friend request accepted",
+  });
 });
 
 export const declineRequest = asyncHandler(async (req, res, next) => {
-  console.log("dec");
-  return next();
+  const request = await requestModel.findOne({ _id: req.params.requestId });
+
+  if (!request) {
+    res.status(400);
+    return res.json({
+      success: false,
+      message: "Bad request",
+    });
+  }
+
+  if (!req.user._id.equals(request.receiver)) {
+    res.status(401);
+    return res.json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  await requestModel.findOneAndDelete({ _id: request._id });
+
+  res.status(200);
+  return res.json({
+    success: true,
+    message: "Friend request declined",
+  });
 });

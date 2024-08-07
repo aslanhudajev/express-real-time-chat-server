@@ -12,14 +12,14 @@ const router = express.Router();
 
 router.get("/me");
 
-router.get("/rooms", roomsController.getRooms);
 router.get("/room/:roomId", roomsController.getRoom);
+router.get("/rooms", roomsController.getRooms);
 router.post("/room/remove");
 
-router.post("/request/accept/:requestId", requestsController.acceptRequest);
 router.post("/request/decline/:requestId", requestsController.declineRequest);
-router.get("/requests", requestsController.getRequests);
+router.post("/request/accept/:requestId", requestsController.acceptRequest);
 router.post("/request/send", requestsController.sendRequest);
+router.get("/requests", requestsController.getRequests);
 
 //! Add controller functions for these
 //! Add controller functions for these

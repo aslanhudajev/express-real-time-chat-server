@@ -16,7 +16,7 @@ await mongoose
     dbName: "express-real-time-chat",
   })
   .then(() => {
-    console.log("MDG connection succefull");
+    console.log("MDB connection succefull");
   })
   .catch((error) => {
     console.log("MDB connection failed:");
@@ -50,7 +50,7 @@ passport.use(
 const nodeServer = createServer(app);
 const io = new Server(nodeServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.SOCKET_SERVER_ORIGIN,
   },
 });
 
@@ -84,5 +84,4 @@ io.on("connection", (socket) => {
 
 nodeServer.listen(process.env.PORT, () => {
   console.log(`App running on port: ${process.env.PORT}`);
-  console.log(`Server URL: http://localhost:${process.env.PORT}`);
 });
